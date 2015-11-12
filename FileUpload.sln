@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileUpload", "FileUpload\FileUpload.csproj", "{A206D5EB-F7FB-4E8E-8CB1-79FAC5F0F832}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{963185D9-5EA4-4BC0-8DB7-30A85A22400C}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\AzureVMPublishModule.psm1 = PublishScripts\AzureVMPublishModule.psm1
+		PublishScripts\Publish-WebApplicationVM.ps1 = PublishScripts\Publish-WebApplicationVM.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{2E86CCBC-377F-4865-ADF9-C1F91872BEC4}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Configurations\FileUpload-WAWS-dev.json = PublishScripts\Configurations\FileUpload-WAWS-dev.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A206D5EB-F7FB-4E8E-8CB1-79FAC5F0F832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A206D5EB-F7FB-4E8E-8CB1-79FAC5F0F832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A206D5EB-F7FB-4E8E-8CB1-79FAC5F0F832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A206D5EB-F7FB-4E8E-8CB1-79FAC5F0F832}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2E86CCBC-377F-4865-ADF9-C1F91872BEC4} = {963185D9-5EA4-4BC0-8DB7-30A85A22400C}
+	EndGlobalSection
+EndGlobal
