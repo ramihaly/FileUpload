@@ -1,9 +1,4 @@
-###
-OneBranch Specific
-###
-
-# MSBuild's log file
-msbuild.log
+FileUpload/AzureCredentials.cs
 
 # VSMSBuild generated files in CoreXT
 *.projhash*

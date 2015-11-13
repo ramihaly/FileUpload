@@ -15,10 +15,6 @@ namespace WebApplication1
 {
 	public class Helper
 	{
-		public static string Endpoint = "";
-		public static string StorageAccountName = "";
-		public static string StorageAccountKey = "";
-
 		public static HttpWebRequest CreateRESTRequest(
 			string method,
 			string resource,
@@ -28,7 +24,7 @@ namespace WebApplication1
 		{
 			byte[] byteArray = null;
 			DateTime now = DateTime.UtcNow;
-			string uri = Helper.Endpoint + resource;
+			string uri = AzureCredentials.Endpoint + resource;
 			var request = HttpWebRequest.Create(uri) as HttpWebRequest;
 			request.Method = method;
 			request.ContentLength = 0;
@@ -169,7 +165,7 @@ namespace WebApplication1
 				(method == "GET" || method == "HEAD") ? String.Empty : request.ContentLength.ToString(),
 				ifMatch,
 				GetCanonicalizedHeaders(request),
-				GetCanonicalizedResource(request.RequestUri, StorageAccountName),
+				GetCanonicalizedResource(request.RequestUri, AzureCredentials.StorageAccountName),
 				md5
 				);
 
@@ -178,13 +174,13 @@ namespace WebApplication1
 
 			//create the HMACSHA256 version of the storage key
 			System.Security.Cryptography.HMACSHA256 SHA256 =
-				new System.Security.Cryptography.HMACSHA256(Convert.FromBase64String(StorageAccountKey));
+				new System.Security.Cryptography.HMACSHA256(Convert.FromBase64String(AzureCredentials.StorageAccountKey));
 
 			//Compute the hash of the SignatureBytes and convert it to a base64 string.
 			string signature = Convert.ToBase64String(SHA256.ComputeHash(SignatureBytes));
 
 			//this is the actual header that will be added to the list of request headers
-			string AuthorizationHeader = "SharedKey " + StorageAccountName
+			string AuthorizationHeader = "SharedKey " + AzureCredentials.StorageAccountName
 				+ ":" + Convert.ToBase64String(SHA256.ComputeHash(SignatureBytes));
 
 			return AuthorizationHeader;

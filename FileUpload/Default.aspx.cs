@@ -41,9 +41,24 @@ namespace WebApplication1
 				string filename = Path.GetFileName(FileUploadControl.FileName);
 				Debug.WriteLine("File name: " + FileUploadControl.FileName.ToString());
 				var byteString = System.Text.Encoding.UTF8.GetString(FileUploadControl.FileBytes);
-				var stream = FileUploadControl.FileContent;
-				//Debug.WriteLine("File bytes: " + byteString);
+				var fileContentStream = FileUploadControl.FileContent;
 				Debug.WriteLine("Keywords: " + Keywords.Text);
+
+				var headers = new SortedList<string, string>();
+				headers.Add("x-ms-blob-type", "BlockBlob");
+				var request = Helper.CreateRESTRequest("PUT", "/public/" + FileUploadControl.FileName, byteString, headers);
+				var response = request.GetResponse() as HttpWebResponse;
+
+				if (response.StatusCode == HttpStatusCode.Created)
+				{
+					Debug.WriteLine("Blob created");
+				}
+
+				using (Stream stream = response.GetResponseStream())
+				{
+					var reader = new StreamReader(stream, Encoding.UTF8);
+					var responseString = reader.ReadToEnd();
+				}
 			}
 			catch (Exception ex)
 			{
