@@ -21,7 +21,6 @@ namespace WebApplication1
             this.UploadCompletedMessage.Text = "";
             this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "black");
             this.GetMetadataBtn.Visible = false;
-            this.Keywords.Text = "";
         }
 
         public bool AcceptAllCertifications(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certification, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
@@ -67,6 +66,8 @@ namespace WebApplication1
                     this.UploadCompletedMessage.Text = "File upload failed! :(";
                     this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "red");
                 }
+
+                this.Keywords.Text = "";
             }
             catch (Exception ex)
             {
@@ -103,9 +104,9 @@ namespace WebApplication1
         {
 
             var headers = new SortedList<string, string>
-				{
-					{ "x-ms-blob-type", "BlockBlob" }
-				};
+                {
+                    { "x-ms-blob-type", "BlockBlob" }
+                };
             var request = Helper.CreateRESTRequest("PUT", "/public/" + filename, byteString, headers);
             var response = request.GetResponse() as HttpWebResponse;
 
@@ -144,7 +145,7 @@ namespace WebApplication1
                 values["Name"] = filename;
                 values["ContentUrl"] = AzureCredentials.BlobEndpoint + "/public/" + filename;
 
-                var keywordsSplit = keywords.Split(';');
+                var keywordsSplit = keywords.IndexOf(";", StringComparison.InvariantCulture) > -1 ? keywords.Split(';') : new string[] { keywords };
                 var keywordsJson = new StringBuilder();
                 keywordsJson.Append("[");
                 for (var i = 0; i < keywordsSplit.Length - 1; ++i)
