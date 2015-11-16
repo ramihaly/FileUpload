@@ -19,6 +19,7 @@ namespace WebApplication1
 		{
 			this.UploadCompletedMessage.Text = "";
 			this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "black");
+			this.GetMetadataBtn.Visible = false;
 			this.Keywords.Text = "";
 		}
 
@@ -53,6 +54,7 @@ namespace WebApplication1
 				{
 					this.UploadCompletedMessage.Text = "File uploaded successfully";
 					this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "green");
+					this.GetMetadataBtn.Visible = true;
 				}
 				else if (status == HttpStatusCode.InternalServerError)
 				{
@@ -183,6 +185,11 @@ namespace WebApplication1
 
 				return HttpStatusCode.Created;
 			}
+		}
+
+		protected void GetMetadataBtn_Click(object sender, EventArgs e)
+		{
+			Response.Redirect(AzureCredentials.EntitiesEndpoint);
 		}
 	}
 }
