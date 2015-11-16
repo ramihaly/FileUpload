@@ -24,7 +24,7 @@ namespace WebApplication1
 		{
 			byte[] byteArray = null;
 			DateTime now = DateTime.UtcNow;
-			string uri = AzureCredentials.Endpoint + resource;
+			string uri = AzureCredentials.BlobEndpoint + resource;
 			var request = HttpWebRequest.Create(uri) as HttpWebRequest;
 			request.Method = method;
 			request.ContentLength = 0;
