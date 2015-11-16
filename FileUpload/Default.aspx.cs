@@ -15,28 +15,17 @@ namespace WebApplication1
 {
 	public partial class _Default : Page
 	{
-		protected void Page_Load(object sender, EventArgs e)
+		private void Initialize()
 		{
 			this.UploadCompletedMessage.Text = "";
 			this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "black");
-			var request = Helper.CreateRESTRequest("GET", "?comp=list");
-			var response = request.GetResponse() as HttpWebResponse;
+			this.Keywords.Text = "";
+		}
 
-			if (response == null)
-			{
-				return;
-			}
-
-			using (var stream = response.GetResponseStream())
-			{
-				if (stream == null)
-				{
-					return;
-				}
-
-				var reader = new StreamReader(stream, Encoding.UTF8);
-				var responseString = reader.ReadToEnd();
-			}
+		protected void Page_Load(object sender, EventArgs e)
+		{
+			this.Initialize();
+			this.GetContainerList_Rest();
 		}
 
 
@@ -74,6 +63,30 @@ namespace WebApplication1
 			catch (Exception ex)
 			{
 				Debug.WriteLine("Could not upload file: " + ex.Message);
+				this.UploadCompletedMessage.Text = "File upload failed! :(";
+				this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "red");
+			}
+		}
+
+		private void GetContainerList_Rest()
+		{
+			var request = Helper.CreateRESTRequest("GET", "?comp=list");
+			var response = request.GetResponse() as HttpWebResponse;
+
+			if (response == null)
+			{
+				return;
+			}
+
+			using (var stream = response.GetResponseStream())
+			{
+				if (stream == null)
+				{
+					return;
+				}
+
+				var reader = new StreamReader(stream, Encoding.UTF8);
+				var responseString = reader.ReadToEnd();
 			}
 		}
 
