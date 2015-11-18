@@ -46,14 +46,11 @@ namespace WebApplication1
             try
             {
                 var filename = Path.GetFileName(this.FileUploadControl.FileName);
-                Debug.WriteLine("File name: " + filename);
-                var byteString = Encoding.UTF8.GetString(this.FileUploadControl.FileBytes);
-                Debug.WriteLine("Keywords: " + this.Keywords.Text);
 
                 // POST to /entities endpoint
                 var fileId = PostEntity(filename, this.Keywords.Text);
 
-                var status = PutBlob_Rest(filename, byteString);
+                var status = PutBlob_Rest(filename, this.FileUploadControl.FileBytes);
                 // POST to /upload endpoint
                 //var status = PostUpload(contentUrl, byteString);
                 if (status == HttpStatusCode.Created)
@@ -102,14 +99,14 @@ namespace WebApplication1
         }
 
         // REST API call
-        private static HttpStatusCode PutBlob_Rest(string filename, string byteString)
+        private static HttpStatusCode PutBlob_Rest(string filename, byte[] byteArray)
         {
 
             var headers = new SortedList<string, string>
                 {
                     { "x-ms-blob-type", "BlockBlob" }
                 };
-            var request = Helper.CreateRESTRequest("PUT", "/public/" + filename, byteString, headers);
+            var request = Helper.CreateRESTRequest("PUT", "/public/" + filename, byteArray, headers);
             var response = request.GetResponse() as HttpWebResponse;
 
             if (response == null)
@@ -118,17 +115,6 @@ namespace WebApplication1
             }
 
             return response.StatusCode;
-
-            //using (var stream = response.GetResponseStream())
-            //{
-            //	if (stream == null)
-            //	{
-            //		return;
-            //	}
-
-            //	var reader = new StreamReader(stream, Encoding.UTF8);
-            //	var responseString = reader.ReadToEnd();
-            //}
         }
 
         private static void GetEntity(string Id)
@@ -180,30 +166,30 @@ namespace WebApplication1
             }
         }
 
-        private static HttpStatusCode PostUpload(string contentUrl, string byteString)
-        {
-            using (var client = new WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
-                client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
+        //private static HttpStatusCode PostUpload(string contentUrl, string byteString)
+        //{
+        //	using (var client = new WebClient())
+        //	{
+        //		client.Headers[HttpRequestHeader.ContentType] = "application/json";
+        //		client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
+        //		client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
-                var jsonString = @"{""ContentUrl"": """ + contentUrl + @""", ""Content"": """ + byteString + @""" }";
+        //		var jsonString = @"{""ContentUrl"": """ + contentUrl + @""", ""Content"": """ + byteString + @""" }";
 
-                try
-                {
-                    var response = client.UploadString(AzureCredentials.UploadEndpoint, jsonString);
-                    Debug.WriteLine(response);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine("Exception " + e.Message + " occurred when attempting to POST to UPLOAD endpoint");
-                    return HttpStatusCode.InternalServerError;
-                }
+        //		try
+        //		{
+        //			var response = client.UploadString(AzureCredentials.UploadEndpoint, jsonString);
+        //			Debug.WriteLine(response);
+        //		}
+        //		catch (Exception e)
+        //		{
+        //			Debug.WriteLine("Exception " + e.Message + " occurred when attempting to POST to UPLOAD endpoint");
+        //			return HttpStatusCode.InternalServerError;
+        //		}
 
-                return HttpStatusCode.Created;
-            }
-        }
+        //		return HttpStatusCode.Created;
+        //	}
+        //}
 
         protected void GetMetadataBtn_Click(object sender, EventArgs e)
         {

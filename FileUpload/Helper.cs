@@ -18,7 +18,7 @@ namespace WebApplication1
         public static WebRequest CreateRESTRequest(
             string method,
             string resource,
-            string requestBody = null,
+            byte[] requestBody = null,
             SortedList<string, string> headers = null,
             string ifMatch = "", string md5 = "")
         {
@@ -42,11 +42,11 @@ namespace WebApplication1
             }
 
             //if there is a requestBody, add a header for the Accept-Charset and set the content length
-            if (!String.IsNullOrEmpty(requestBody))
+            if (requestBody != null)
             {
-                request.Headers.Add("Accept-Charset", "UTF-8");
+                //request.Headers.Add("Accept-Charset", "UTF-8");
 
-                byteArray = Encoding.UTF8.GetBytes(requestBody);
+                byteArray = requestBody; //Encoding.UTF8.GetBytes(requestBody);
                 request.ContentLength = byteArray.Length;
             }
 
@@ -54,7 +54,7 @@ namespace WebApplication1
             request.Headers.Add("Authorization", AuthorizationHeader(method, now, request, ifMatch, md5));
 
             //now set the body in the request object 
-            if (!String.IsNullOrEmpty(requestBody))
+            if (requestBody != null)
             {
                 request.GetRequestStream().Write(byteArray, 0, byteArray.Length);
             }
