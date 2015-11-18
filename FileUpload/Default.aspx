@@ -4,7 +4,7 @@
 
 	<div class="jumbotron">
 		<asp:Label runat="server" id="UploadCompletedMessage" Text="" />
-		<asp:LinkButton runat="server" id="GetMetadataBtn" Text="Get file metadata" Visible="false" OnClick="GetMetadataBtn_Click" />
+		<asp:LinkButton runat="server" id="GetMetadataBtn" Text="Get file metadata" Visible="false" OnClick="GetMetadataBtn_Click"/>
 	    <div>
 		    <asp:Label runat="server" id="KeywordsLabel" Text="Keywords:" />
 		    <asp:TextBox runat="server" id="Keywords" />

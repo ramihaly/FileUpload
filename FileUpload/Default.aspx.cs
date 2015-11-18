@@ -31,7 +31,7 @@ namespace WebApplication1
         protected void Page_Load(object sender, EventArgs e)
         {
             this.Initialize();
-            this.GetContainerList_Rest();
+            GetContainerList_Rest();
         }
 
 
@@ -51,15 +51,17 @@ namespace WebApplication1
                 Debug.WriteLine("Keywords: " + this.Keywords.Text);
 
                 // POST to /entities endpoint
-                var contentUrl = PostEntity(filename, this.Keywords.Text);
+                var fileId = PostEntity(filename, this.Keywords.Text);
 
+                var status = PutBlob_Rest(filename, byteString);
                 // POST to /upload endpoint
-                var status = PostUpload(contentUrl, byteString);
+                //var status = PostUpload(contentUrl, byteString);
                 if (status == HttpStatusCode.Created)
                 {
                     this.UploadCompletedMessage.Text = "File uploaded successfully";
                     this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "green");
                     this.GetMetadataBtn.Visible = true;
+                    this.GetMetadataBtn.CommandArgument = fileId;
                 }
                 else if (status == HttpStatusCode.InternalServerError)
                 {
@@ -77,7 +79,7 @@ namespace WebApplication1
             }
         }
 
-        private void GetContainerList_Rest()
+        private static void GetContainerList_Rest()
         {
             var request = Helper.CreateRESTRequest("GET", "?comp=list");
             var response = request.GetResponse() as HttpWebResponse;
@@ -100,7 +102,7 @@ namespace WebApplication1
         }
 
         // REST API call
-        private static void PutBlob_Rest(string filename, string byteString)
+        private static HttpStatusCode PutBlob_Rest(string filename, string byteString)
         {
 
             var headers = new SortedList<string, string>
@@ -110,25 +112,34 @@ namespace WebApplication1
             var request = Helper.CreateRESTRequest("PUT", "/public/" + filename, byteString, headers);
             var response = request.GetResponse() as HttpWebResponse;
 
-            if (response != null && response.StatusCode == HttpStatusCode.Created)
-            {
-                Debug.WriteLine("Blob created");
-            }
-
             if (response == null)
             {
-                return;
+                return HttpStatusCode.InternalServerError;
             }
 
-            using (var stream = response.GetResponseStream())
-            {
-                if (stream == null)
-                {
-                    return;
-                }
+            return response.StatusCode;
 
-                var reader = new StreamReader(stream, Encoding.UTF8);
-                var responseString = reader.ReadToEnd();
+            //using (var stream = response.GetResponseStream())
+            //{
+            //	if (stream == null)
+            //	{
+            //		return;
+            //	}
+
+            //	var reader = new StreamReader(stream, Encoding.UTF8);
+            //	var responseString = reader.ReadToEnd();
+            //}
+        }
+
+        private static void GetEntity(string Id)
+        {
+            using (var client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
+                client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
+
+                client.DownloadString(AzureCredentials.EntitiesEndpoint + "(" + Id + ")");
             }
         }
 
@@ -165,7 +176,7 @@ namespace WebApplication1
                     return string.Empty;
                 }
 
-                return values["ContentUrl"];
+                return values["Id"];
             }
         }
 
@@ -196,7 +207,11 @@ namespace WebApplication1
 
         protected void GetMetadataBtn_Click(object sender, EventArgs e)
         {
-            Response.Redirect(AzureCredentials.EntitiesEndpoint);
+            LinkButton btn = (LinkButton)sender;
+            var fileId = btn.CommandArgument;
+            var url = AzureCredentials.EntitiesEndpoint + "(" + fileId + ")";
+            Debug.WriteLine(url);
+            Response.Redirect(url);
         }
     }
 }
