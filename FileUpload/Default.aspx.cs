@@ -48,23 +48,25 @@ namespace WebApplication1
                 var filename = Path.GetFileName(this.FileUploadControl.FileName);
 
                 // POST to /entities endpoint
-                var fileId = PostEntity(filename, this.Keywords.Text);
+                //var fileId = PostEntity(filename, this.Keywords.Text);
 
-                var status = PutBlob_Rest(filename, this.FileUploadControl.FileBytes);
+                HelperSas.UploadFile(this.FileUploadControl.FileContent);
+                //var status = PutBlob_Rest(filename, this.FileUploadControl.FileBytes);
+
                 // POST to /upload endpoint
                 //var status = PostUpload(contentUrl, byteString);
-                if (status == HttpStatusCode.Created)
-                {
-                    this.UploadCompletedMessage.Text = "File uploaded successfully";
-                    this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "green");
-                    this.GetMetadataBtn.Visible = true;
-                    this.GetMetadataBtn.CommandArgument = fileId;
-                }
-                else if (status == HttpStatusCode.InternalServerError)
-                {
-                    this.UploadCompletedMessage.Text = "File upload failed! :(";
-                    this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "red");
-                }
+                //if (status == HttpStatusCode.Created)
+                //{
+                //	this.UploadCompletedMessage.Text = "File uploaded successfully";
+                //	this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "green");
+                //	this.GetMetadataBtn.Visible = true;
+                //	this.GetMetadataBtn.CommandArgument = fileId;
+                //}
+                //else if (status == HttpStatusCode.InternalServerError)
+                //{
+                //	this.UploadCompletedMessage.Text = "File upload failed! :(";
+                //	this.UploadCompletedMessage.Style.Add(HtmlTextWriterStyle.Color, "red");
+                //}
 
                 this.Keywords.Text = "";
             }
