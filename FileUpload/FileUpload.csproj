@@ -358,6 +358,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="AzureCredentials.cs" />
+    <Compile Include="BlobUri.cs" />
     <Compile Include="HelperSas.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Models\IdentityModels.cs" />

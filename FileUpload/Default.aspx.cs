@@ -117,17 +117,17 @@ namespace WebApplication1
 		//	return response.StatusCode;
 		//}
 
-		//private static void GetEntity(string id)
-		//{
-		//	using (var client = new WebClient())
-		//	{
-		//		client.Headers[HttpRequestHeader.ContentType] = "application/json";
-		//		client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
-		//		client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
+		private static string GetEntity(string entity, string id)
+		{
+			using (var client = new WebClient())
+			{
+				client.Headers[HttpRequestHeader.ContentType] = "application/json";
+				client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
+				client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
-		//		client.DownloadString(GetEntityByKeyEndpoint("Files", id));
-		//	}
-		//}
+				return client.DownloadString(GetEntityByKeyEndpoint(entity, id));
+			}
+		}
 
 		private static string PostFileEntity(string filename, string keywords)
 		{
@@ -176,7 +176,11 @@ namespace WebApplication1
 				var values = new NameValueCollection();
 				var fileVersionId = Guid.NewGuid().ToString();
 
-
+				var fileVersionExists = GetEntity("FileVersions", fileVersionId) == "OK";
+				if (fileVersionExists)
+				{
+					return fileVersionId;
+				}
 
 				values["Id"] = fileVersionId;
 				values["ContentType"] = "myType";
