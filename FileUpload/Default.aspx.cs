@@ -5,9 +5,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Newtonsoft.Json;
 
 namespace WebApplication1
 {
@@ -46,8 +46,8 @@ namespace WebApplication1
 				var filename = Path.GetFileName(this.FileUploadControl.FileName);
 
 				// POST to /entities endpoint
-				var fileId = PostFileEntity(filename, this.Keywords.Text);
-				var fileVersionId = PostFileVersionEntity(fileId);
+				var fileId = PostFileEntity(filename);
+				var fileVersionId = PostFileVersionEntity(fileId, this.Keywords.Text);
 				HelperSas.UploadFile(fileId, fileVersionId, this.FileUploadControl.FileContent);
 				//var status = PutBlob_Rest(filename, this.FileUploadControl.FileBytes);
 
@@ -129,7 +129,7 @@ namespace WebApplication1
 			}
 		}
 
-		private static string PostFileEntity(string filename, string keywords)
+		private static string PostFileEntity(string filename)
 		{
 			using (var client = new WebClient())
 			{
@@ -137,19 +137,11 @@ namespace WebApplication1
 				client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
 				client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
-				var values = new NameValueCollection();
+				var values = new Dictionary<string, string>();
 				values["Id"] = Guid.NewGuid().ToString();
 				values["Name"] = filename;
+				var jsonString = JsonConvert.SerializeObject(values);
 
-				var keywordsSplit = keywords.IndexOf(";", StringComparison.InvariantCulture) > -1 ? keywords.Split(';') : new string[] { keywords };
-				var keywordsJson = new StringBuilder();
-				keywordsJson.Append("[");
-				for (var i = 0; i < keywordsSplit.Length - 1; ++i)
-				{
-					keywordsJson.Append(@"""" + keywordsSplit[i] + @"""" + ", ");
-				}
-				keywordsJson.Append(@"""" + keywordsSplit[keywordsSplit.Length - 1] + @"""" + "]");
-				var jsonString = @"{""Id"": """ + values["Id"] + @""", ""Name"": """ + values["Name"] + @""", ""Keywords"": " + keywordsJson + @", ""References"": [] }";
 				try
 				{
 					var response = client.UploadString(GetEndpoint("Files"), jsonString);
@@ -165,7 +157,7 @@ namespace WebApplication1
 			}
 		}
 
-		private static string PostFileVersionEntity(string fileId)
+		private static string PostFileVersionEntity(string fileId, string keywords)
 		{
 			using (var client = new WebClient())
 			{
@@ -173,21 +165,30 @@ namespace WebApplication1
 				client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
 				client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
-				var values = new NameValueCollection();
 				var fileVersionId = Guid.NewGuid().ToString();
-
 				var fileVersionExists = GetEntity("FileVersions", fileVersionId) == "OK";
 				if (fileVersionExists)
 				{
 					return fileVersionId;
 				}
 
+				var values = new Dictionary<string, string>();
 				values["Id"] = fileVersionId;
 				values["ContentType"] = "myType";
 				values["FileId"] = fileId;
 				values["BlobUri"] = BlobUri.GetUri(AzureCredentials.StorageAccountName, fileId, values["Id"]).ToString();
-				var jss = new JavaScriptSerializer();
-				var jsonString = jss.Serialize(values);
+				values["Keywords"] = keywords;
+				//var keywordsSplit = keywords.IndexOf(";", StringComparison.InvariantCulture) > -1 ? keywords.Split(';') : new string[] { keywords };
+				//var keywordsJson = new StringBuilder();
+				//keywordsJson.Append("[");
+				//for (var i = 0; i < keywordsSplit.Length - 1; ++i)
+				//{
+				//	keywordsJson.Append(@"""" + keywordsSplit[i] + @"""" + ", ");
+				//}
+				//keywordsJson.Append(@"""" + keywordsSplit[keywordsSplit.Length - 1] + @"""" + "]");
+				//var jsonString = @"{""Id"": """ + values["Id"] + @""", ""Name"": """ + values["Name"] + @""", ""Keywords"": " + keywordsJson + @", ""References"": [] }";
+
+				var jsonString = JsonConvert.SerializeObject(values);
 				try
 				{
 					var response = client.UploadString(GetEndpoint("FileVersions"), jsonString);
