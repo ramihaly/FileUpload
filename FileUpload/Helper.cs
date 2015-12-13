@@ -15,6 +15,16 @@ namespace WebApplication1
 {
     public class Helper
     {
+        public static string GetEndpoint(string entities)
+        {
+            return AzureCredentials.EntitiesHost + "/" + entities;
+        }
+
+        public static string GetEntityByKeyEndpoint(string entities, string key)
+        {
+            return AzureCredentials.EntitiesHost + "/" + entities + "(" + key + ")";
+        }
+
         public static WebRequest CreateRESTRequest(
             string method,
             string resource,

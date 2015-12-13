@@ -47,6 +47,12 @@ namespace WebApplication1
 
 				// POST to /entities endpoint
 				var fileId = PostFileEntity(filename);
+				if (string.IsNullOrEmpty(fileId))
+				{
+					Debug.WriteLine("Error occurred. Stopped");
+					return;
+				}
+
 				var fileVersionId = PostFileVersionEntity(fileId, this.Keywords.Text);
 				HelperSas.UploadFile(fileId, fileVersionId, this.FileUploadControl.FileContent);
 				//var status = PutBlob_Rest(filename, this.FileUploadControl.FileBytes);
@@ -98,26 +104,7 @@ namespace WebApplication1
 			}
 		}
 
-		// REST API call
-		//private static HttpStatusCode PutBlob_Rest(string filename, byte[] byteArray)
-		//{
-
-		//	var headers = new SortedList<string, string>
-		//		{
-		//			{ "x-ms-blob-type", "BlockBlob" }
-		//		};
-		//	var request = Helper.CreateRESTRequest("PUT", "/public/" + filename, byteArray, headers);
-		//	var response = request.GetResponse() as HttpWebResponse;
-
-		//	if (response == null)
-		//	{
-		//		return HttpStatusCode.InternalServerError;
-		//	}
-
-		//	return response.StatusCode;
-		//}
-
-		private static string GetEntity(string entity, string id)
+		private static HttpStatusCode GetEntity(string entity, string id)
 		{
 			using (var client = new WebClient())
 			{
@@ -125,7 +112,16 @@ namespace WebApplication1
 				client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
 				client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
-				return client.DownloadString(GetEntityByKeyEndpoint(entity, id));
+				try
+				{
+					client.DownloadString(Helper.GetEntityByKeyEndpoint(entity, id));
+				} catch (Exception e) {
+					if (e.Message.Contains("NotFound")) {
+						return HttpStatusCode.NotFound;
+					}
+				}
+
+				return HttpStatusCode.OK;
 			}
 		}
 
@@ -144,7 +140,7 @@ namespace WebApplication1
 
 				try
 				{
-					var response = client.UploadString(GetEndpoint("Files"), jsonString);
+					var response = client.UploadString(Helper.GetEndpoint("Files"), jsonString);
 					Debug.WriteLine(response);
 				}
 				catch (Exception e)
@@ -166,7 +162,7 @@ namespace WebApplication1
 				client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
 
 				var fileVersionId = Guid.NewGuid().ToString();
-				var fileVersionExists = GetEntity("FileVersions", fileVersionId) == "OK";
+				var fileVersionExists = HttpStatusCode.NotFound != GetEntity("FileVersions", fileVersionId);
 				if (fileVersionExists)
 				{
 					return fileVersionId;
@@ -178,20 +174,10 @@ namespace WebApplication1
 				values["FileId"] = fileId;
 				values["BlobUri"] = BlobUri.GetUri(AzureCredentials.StorageAccountName, fileId, values["Id"]).ToString();
 				values["Keywords"] = keywords;
-				//var keywordsSplit = keywords.IndexOf(";", StringComparison.InvariantCulture) > -1 ? keywords.Split(';') : new string[] { keywords };
-				//var keywordsJson = new StringBuilder();
-				//keywordsJson.Append("[");
-				//for (var i = 0; i < keywordsSplit.Length - 1; ++i)
-				//{
-				//	keywordsJson.Append(@"""" + keywordsSplit[i] + @"""" + ", ");
-				//}
-				//keywordsJson.Append(@"""" + keywordsSplit[keywordsSplit.Length - 1] + @"""" + "]");
-				//var jsonString = @"{""Id"": """ + values["Id"] + @""", ""Name"": """ + values["Name"] + @""", ""Keywords"": " + keywordsJson + @", ""References"": [] }";
-
 				var jsonString = JsonConvert.SerializeObject(values);
 				try
 				{
-					var response = client.UploadString(GetEndpoint("FileVersions"), jsonString);
+					var response = client.UploadString(Helper.GetEndpoint("FileVersions"), jsonString);
 					Debug.WriteLine(response);
 				}
 				catch (Exception e)
@@ -204,47 +190,13 @@ namespace WebApplication1
 			}
 		}
 
-		//private static HttpStatusCode PostUpload(string contentUrl, string byteString)
-		//{
-		//	using (var client = new WebClient())
-		//	{
-		//		client.Headers[HttpRequestHeader.ContentType] = "application/json";
-		//		client.Headers[HttpRequestHeader.AcceptCharset] = "UTF-8";
-		//		client.Headers[HttpRequestHeader.UserAgent] = "Fiddler";
-
-		//		var jsonString = @"{""ContentUrl"": """ + contentUrl + @""", ""Content"": """ + byteString + @""" }";
-
-		//		try
-		//		{
-		//			var response = client.UploadString(AzureCredentials.UploadEndpoint, jsonString);
-		//			Debug.WriteLine(response);
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			Debug.WriteLine("Exception " + e.Message + " occurred when attempting to POST to UPLOAD endpoint");
-		//			return HttpStatusCode.InternalServerError;
-		//		}
-
-		//		return HttpStatusCode.Created;
-		//	}
-		//}
-
 		protected void GetMetadataBtn_Click(object sender, EventArgs e)
 		{
 			LinkButton btn = (LinkButton)sender;
 			var fileId = btn.CommandArgument;
-			var url = GetEntityByKeyEndpoint("Files", fileId);
+			var url = Helper.GetEntityByKeyEndpoint("Files", fileId);
 			Debug.WriteLine(url);
 			Response.Redirect(url);
-		}
-
-		public static string GetEndpoint(string entities) {
-			return AzureCredentials.EntitiesHost + "/" + entities;
-		}
-
-		public static string GetEntityByKeyEndpoint(string entities, string key)
-		{
-			return AzureCredentials.EntitiesHost + "/" + entities + "(" + key + ")";
 		}
 	}
 }
